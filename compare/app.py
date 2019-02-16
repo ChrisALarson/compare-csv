@@ -1,5 +1,41 @@
 import csv
 
+# add file list
+class IndexList:
+    def __init__(self):
+        self.head = None
+        self.tail = None
+        self.size = 0
+    
+    def _add_row(self, row):
+        if self.head is None:
+            self.head = row
+            self.tail = row
+        else:
+            self.tail.next_row = row
+            self.tail = row
+    
+    def add_row(self, row):
+        node = self.head
+        while node is not None:
+            if node == row:
+                node.add_one()
+                return True
+            else:
+                node = node.next_row
+        self._add_row(row)
+        return True
+    
+    def __str__(self):
+        rep = ''
+        node = self.head
+        while node is not None:
+            rep += str(node) 
+            node = node.next_row
+            if node is not None:
+                rep += '\n'
+        return rep
+
 class RowNode:
     def __init__(self, index, data):
         self.index = index
@@ -26,31 +62,20 @@ def create_file_dict(file_path, index, fieldnames=None):
             row_ind = row[index]
             data = dict(row)
             row_node = RowNode(row_ind, data)
-
             if (row_ind in file_dict):
-                node = file_dict[row_ind]
-                while node is not None:
-                    if (node == row_node):
-                        node.add_one()
-                        node = None
-                    else:
-                        if node.next_row is not None:
-                            node = node.next_row
-                        else:
-                            node.next_row = row_node
-                            node = None
+                index_list = file_dict[row_ind]
+                index_list.add_row(row_node)
             else:
-                file_dict[row_ind] = row_node 
+                index_list = IndexList()
+                index_list.add_row(row_node)
+                file_dict[row_ind] = index_list
     return file_dict
+
 
 def print_file_dict(file_dict):
     print('printing file')
-    for index, row_list in file_dict.items():
-        node = row_list
-        while node is not None:
-            print(node)
-            node = node.next_row
-
+    for index, index_list in file_dict.items():
+        print(str(index_list))
 
 # tests
 file1dict = create_file_dict('test/resources/file1.csv', 'employee_id')
